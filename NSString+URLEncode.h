@@ -1,6 +1,5 @@
 //
 //  NSString+URLEncode.h
-//  CatHerding
 //
 //  Created by Scott James Remnant on 6/1/11.
 //  Copyright 2011 Scott James Remnant <scott@netsplit.com>. All rights reserved.
