@@ -1,0 +1,19 @@
+This is my implementation of OAuth signing for ASIHTTPRequest. Unlike other implementations, this isn't a subclass of either ASIHTTPRequest or ASIFormDataRequest but a Category (mostly on the former). This allows it to be used with all methods, and other sub-classes you might make (such as my own NIHJSONRequest class at https://github.com/keybuk/nih-json-request).
+
+Since it's a category, you should include this header instead of the usual one. Construct your ASIHTTPRequest as normal, and before you start, send the signRequestWithClientIdentifier:secret:tokenIdentifier:secret:usingMethod message to add the Authorization header.
+
+  #import "ASIHTTPRequest+OAuth.h"
+
+  NSURL *url = [NSURL URLwithString:@"http://example.com/test?hobbit=frodo&ring=of+power"];
+  ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+
+  [request signRequestWithClientIdentifier:clientIdentifier secret:clientSecret
+                           tokenIdentifier:tokenIdentifier secret:tokenSecret
+                               usingMethod:ASIOAuthHMAC_SHA1SignatureMethod[;
+  [request start];
+
+When working with forms, you should include ASIFormDataRequest+OAuth.h to have the body parameters included.
+
+Two methods are left blank for overriding in sub-classes or categories of sub-classes. These are oauthPostBodyParameters and oauthAdditionalParametersForMethod: - both may return nil, or an array of dictionaries with "key" and "value" members. Parameters returned by the former are added to the base string only, parameters returned by the latter are instead added to the Authorization: OAuth header and only included in the signature if they begin "oauth_".
+
+For examples see the ASIFormDataRequest+OAuth category or the NIHJSONRequest+OAuth category in my other repo.
