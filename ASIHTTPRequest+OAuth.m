@@ -206,6 +206,8 @@ static const NSString *oauthVersion = @"1.0";
                                  secret:(NSString *)tokenSecret
                             usingMethod:(ASIOAuthSignatureMethod)signatureMethod
 {
+    [self buildPostBody];
+    
     NSMutableArray *oauthParameters = [NSMutableArray array];
     
     // Add what we know now to the OAuth parameters
