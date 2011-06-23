@@ -206,6 +206,17 @@ static const NSString *oauthVersion = @"1.0";
                                  secret:(NSString *)tokenSecret
                             usingMethod:(ASIOAuthSignatureMethod)signatureMethod
 {
+    [self signRequestWithClientIdentifier:clientIdentifier secret:clientSecret tokenIdentifier:tokenIdentifier 
+                                   secret:tokenSecret verifier:nil usingMethod:signatureMethod];
+}
+
+- (void)signRequestWithClientIdentifier:(NSString *)clientIdentifier
+                                 secret:(NSString *)clientSecret
+                        tokenIdentifier:(NSString *)tokenIdentifier
+                                 secret:(NSString *)tokenSecret
+                               verifier:(NSString *)verifier
+                            usingMethod:(ASIOAuthSignatureMethod)signatureMethod
+{
     [self buildPostBody];
     
     NSMutableArray *oauthParameters = [NSMutableArray array];
@@ -217,15 +228,17 @@ static const NSString *oauthVersion = @"1.0";
     [oauthParameters addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"oauth_consumer_key", @"key", clientIdentifier, @"value", nil]];
     if (tokenIdentifier != nil)
         [oauthParameters addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"oauth_token", @"key", tokenIdentifier, @"value", nil]];
+    if (verifier != nil)
+        [oauthParameters addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"oauth_verifier", @"key", verifier, @"value", nil]];
     [oauthParameters addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"oauth_signature_method", @"key", oauthSignatureMethodName[signatureMethod], @"value", nil]];
     [oauthParameters addObjectsFromArray:[self oauthGenerateTimestampAndNonce]];    
     [oauthParameters addObjectsFromArray:[self oauthAdditionalParametersForMethod:signatureMethod]];
-
+    
     // Construct the signature base string
     NSString *baseStringURI = [self oauthBaseStringURI];
     NSString *requestParameterString = [self oauthRequestParameterString:oauthParameters];
     NSString *baseString = [NSString stringWithFormat:@"%@&%@&%@", [[self requestMethod] uppercaseString], [baseStringURI encodeForURL], [requestParameterString encodeForURL]];
-
+    
     // Generate the signature
     NSString *signature;
     switch (signatureMethod) {
