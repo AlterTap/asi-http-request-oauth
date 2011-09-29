@@ -12,6 +12,7 @@
 #import "ASIHTTPRequest+OAuth.h"
 #import "NSData+Base64.h"
 #import "NSString+URLEncode.h"
+#import "NSString+UUID.h"
 
 
 // Signature Method strings, keep in sync with ASIOAuthSignatureMethod
@@ -31,43 +32,18 @@ static const NSString *oauthVersion = @"1.0";
 
 - (NSArray *)oauthGenerateTimestampAndNonce
 {
-    static time_t last_timestamp = -1;
-    static NSMutableSet *nonceHistory = nil;
-    
-    // Make sure we never send the same timestamp and nonce
-    if (!nonceHistory)
-        nonceHistory = [[NSMutableSet alloc] init];
-    
     struct timeval tv;
-    NSString *timestamp, *nonce;
-    do {
-        // Get the time of day, for both the timestamp and the random seed
-        gettimeofday(&tv, NULL);
+    NSString *timestamp;
 
-        // Generate a random alphanumeric character sequence for the nonce
-        char nonceBytes[16];
-        srandom(tv.tv_sec | tv.tv_usec);
-        for (int i = 0; i < 16; i++) {
-            int byte = random() % 62;
-            if (byte < 26)
-                nonceBytes[i] = 'a' + byte;
-            else if (byte < 52)
-                nonceBytes[i] = 'A' + byte - 26;
-            else
-                nonceBytes[i] = '0' + byte - 52;
-        }
-        
-        timestamp = [NSString stringWithFormat:@"%d", tv.tv_sec];
-        nonce = [NSString stringWithFormat:@"%.16s", nonceBytes];
-    } while ((tv.tv_sec == last_timestamp) && [nonceHistory containsObject:nonce]);
+    gettimeofday(&tv, NULL);
+    timestamp = [NSString stringWithFormat:@"%d", tv.tv_sec];
+    // nonce might as well be a uuid, they are smaller
+    NSString *randomString = [[[NSString stringWithUUID] stringByReplacingOccurrencesOfString:@"-" withString:@""]
+                              lowercaseString];
     
-    if (tv.tv_sec != last_timestamp) {
-        last_timestamp = tv.tv_sec;
-        [nonceHistory removeAllObjects];
-    }
-    [nonceHistory addObject:nonce];
-    
-    return [NSArray arrayWithObjects:[NSDictionary dictionaryWithObjectsAndKeys:@"oauth_timestamp", @"key", timestamp, @"value", nil], [NSDictionary dictionaryWithObjectsAndKeys:@"oauth_nonce", @"key", nonce, @"value", nil], nil];
+    return [NSArray arrayWithObjects:[NSDictionary dictionaryWithObjectsAndKeys:@"oauth_timestamp", @"key", timestamp, 
+                                      @"value", nil], [NSDictionary dictionaryWithObjectsAndKeys:@"oauth_nonce", @"key", 
+                                                       randomString, @"value", nil], nil];
 }
 
 
