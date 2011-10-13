@@ -12,8 +12,8 @@
 
 - (NSArray *)oauthPostBodyParameters
 {
-	if ([fileData count] > 0)
-        return nil;
+//    if ([fileData count] > 0)
+//        return nil;
 
     return postData;
 }
