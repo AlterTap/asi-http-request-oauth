@@ -35,3 +35,18 @@
 }
 
 @end
+
+NSDictionary *NSDictionaryFromURLParamString(NSString *params)
+{
+    NSArray *params1 = [[params stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] 
+                                    componentsSeparatedByString:@"&"];
+    NSMutableDictionary *ret = [NSMutableDictionary dictionaryWithCapacity:[params1 count]];
+    for (NSString *param in params1) {
+        NSArray *pair = [[param stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]    
+                         componentsSeparatedByString:@"="];
+        if ([pair count] != 2) continue;
+        [ret setObject:[[pair objectAtIndex:1] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]
+                forKey:[[pair objectAtIndex:0] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
+    }
+    return ret;
+} 

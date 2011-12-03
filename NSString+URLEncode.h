@@ -15,3 +15,5 @@
 - (NSString *)decodeFromURL;
 
 @end
+
+NSDictionary *NSDictionaryFromURLParamString(NSString *params);
